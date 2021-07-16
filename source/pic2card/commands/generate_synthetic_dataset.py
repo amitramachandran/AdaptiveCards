@@ -22,7 +22,7 @@ command :  python -m commands.generate_synthetic_dataset \
 
 """
 import argparse
-from typing import Any
+from typing import Any, Sequence, List
 import cv2
 from mystique import config
 from datagen import generate_synthetic_image as synthetic
@@ -59,6 +59,25 @@ def save_img_and_annotations(
         image_name,
     )
 
+def get_synthetic_image_properties(number_of_elements:int, card_elements_dir_path:List)-> Sequence:
+    """
+    To create the synthetic image from the card elements arguments given
+    @param number_of_elements
+    @param card_elements_dir_path
+    return generated_image
+    """
+    layout = synthetic.CardElements(number_of_elements, card_elements_dir_path)
+    padded_image_element = synthetic.add_padding_to_img_elements(
+        layout.elements_with_path
+    )
+    generated_image = synthetic.generate_image(padded_image_element)
+    synthetic_image_properties = {
+                                'layout': layout,
+                                'padded_image': padded_image_element,
+                                'generated_image': generated_image
+                                }
+    return synthetic_image_properties
+
 
 def main(
     card_elements_dir_path=None,
@@ -76,18 +95,15 @@ def main(
     generating_file_paths, generating_xml_paths = get_outgoing_file_paths(
         bulk_img
     )
-    layout = synthetic.CardElements(number_of_elements, card_elements_dir_path)
-    padded_image_element = synthetic.add_padding_to_img_elements(
-        layout.elements_with_path
-    )
-    generated_image = synthetic.generate_image(padded_image_element)
-
     for _ in range(bulk_img):
+        synthetic_image_property = get_synthetic_image_properties(number_of_elements, card_elements_dir_path)
         annotation_xml = get_annotation_file(
-            layout, generated_image, padded_image_element
+            synthetic_image_property['layout'], 
+            synthetic_image_property['generated_image'],
+            synthetic_image_property['padded_image']
         )
         image_with_canvas = synthetic.add_background_colour_to_generated_image(
-            generated_image, background_colour
+            synthetic_image_property['generated_image'], background_colour
         )
         save_img_and_annotations(image_with_canvas, annotation_xml)
     if save_as_zip:
