@@ -59,7 +59,10 @@ def save_img_and_annotations(
         image_name,
     )
 
-def get_synthetic_image_properties(number_of_elements:int, card_elements_dir_path:List)-> Sequence:
+
+def get_synthetic_image_properties(
+    number_of_elements: int, card_elements_dir_path: List
+) -> Sequence:
     """
     To create the synthetic image from the card elements arguments given
     @param number_of_elements
@@ -72,10 +75,10 @@ def get_synthetic_image_properties(number_of_elements:int, card_elements_dir_pat
     )
     generated_image = synthetic.generate_image(padded_image_element)
     synthetic_image_properties = {
-                                'layout': layout,
-                                'padded_image': padded_image_element,
-                                'generated_image': generated_image
-                                }
+        "layout": layout,
+        "padded_image": padded_image_element,
+        "generated_image": generated_image,
+    }
     return synthetic_image_properties
 
 
@@ -96,14 +99,16 @@ def main(
         bulk_img
     )
     for _ in range(bulk_img):
-        synthetic_image_property = get_synthetic_image_properties(number_of_elements, card_elements_dir_path)
+        synthetic_image_property = get_synthetic_image_properties(
+            number_of_elements, card_elements_dir_path
+        )
         annotation_xml = get_annotation_file(
-            synthetic_image_property['layout'], 
-            synthetic_image_property['generated_image'],
-            synthetic_image_property['padded_image']
+            synthetic_image_property["layout"],
+            synthetic_image_property["generated_image"],
+            synthetic_image_property["padded_image"],
         )
         image_with_canvas = synthetic.add_background_colour_to_generated_image(
-            synthetic_image_property['generated_image'], background_colour
+            synthetic_image_property["generated_image"], background_colour
         )
         save_img_and_annotations(image_with_canvas, annotation_xml)
     if save_as_zip:
