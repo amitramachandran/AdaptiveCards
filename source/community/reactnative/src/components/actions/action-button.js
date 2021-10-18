@@ -61,7 +61,10 @@ export class ActionButton extends React.Component {
 			computedStyles.push({ flexGrow: 0 })
 		} else computedStyles.push({ flexGrow: 1 })
 		if (this.hostConfig.actions.actionsOrientation === Enums.Orientation.Horizontal) {
-			computedStyles.push({ maxWidth: this.props.maxWidth })
+			this.hostConfig.actions.actionAlignment != Enums.ActionAlignment.Stretch && computedStyles.push({ maxWidth: this.props.maxWidth })
+		} else {
+			//Vertical actionsOrientation and if it is stretch, the width will be 100%
+			this.hostConfig.actions.actionAlignment === Enums.ActionAlignment.Stretch && computedStyles.push({ width: "100%" })
 		}
 		return computedStyles;
 	}
@@ -72,7 +75,8 @@ export class ActionButton extends React.Component {
 		}
 		this.parsePayload();
 		let computedStyle = [this.getActionAlignment()];
-		computedStyle.push({ opacity: this.payload.isEnabled ? 1.0 : 0.4 })
+		const isEnabled = this.payload.isEnabled == undefined ? true : this.payload.isEnabled //Defautl value is true...We are applying for handling the custom button property
+		computedStyle.push({ opacity: isEnabled ? 1.0 : 0.4 })
 		const ButtonComponent = Platform.OS === Constants.PlatformAndroid ? TouchableNativeFeedback : TouchableOpacity;
 		return (<InputContextConsumer>
 			{({ onExecuteAction, inputArray, addResourceInformation, toggleVisibilityForElementWithID }) => {
@@ -83,7 +87,7 @@ export class ActionButton extends React.Component {
 
 				return <ButtonComponent
 					style={computedStyle}
-					disabled={!this.payload.isEnabled}
+					disabled={!isEnabled}
 					accessible={true}
 					accessibilityLabel={this.altText}
 					accessibilityRole={Constants.Button}
@@ -98,15 +102,16 @@ export class ActionButton extends React.Component {
 	 * @description Invoked for the any action button selected
 	 */
 	onActionButtonTapped = () => {
-		switch (this.payload.type) {
+		let actionPayload = { ... this.payload };
+		switch (actionPayload.type) {
 			case Constants.ActionSubmit:
-				this.onSubmitExecuteActionCalled();
-				break;
 			case Constants.ActionExecute:
-				this.onSubmitExecuteActionCalled();
-				break;
-			case Constants.ActionOpenUrl:
-				this.onOpenURLCalled();
+				actionPayload.data = this.getMergeObject();
+				/*
+				 actionPayload already has `ignoreInputValidation` but to support 
+				 backward compatibility we are passing it explicitly
+				**/
+				this.onExecuteAction(actionPayload, actionPayload.ignoreInputValidation);
 				break;
 			case Constants.ActionShowCard:
 				this.changeShowCardState();
@@ -116,7 +121,7 @@ export class ActionButton extends React.Component {
 				break;
 			default:
 				//Invoked for the custom action type.
-				this.onExecuteAction(this.payload);
+				this.onExecuteAction(actionPayload);
 				break;
 		}
 	}
@@ -132,19 +137,7 @@ export class ActionButton extends React.Component {
 			else
 				mergedObject["actionData"] = this.data;
 		}
-		return mergedObject
-	}
-
-	/**
-	 * @description Invoked for the action type Constants.ActionSubmit and Constants.ActionExecute
-	 */
-	onSubmitExecuteActionCalled() {
-		const { type, verb = "", title = "", ignoreInputValidation } = this.payload;
-		var actionObject = { "type": type, "title": title, "data": this.getMergeObject() };
-		if (this.payload.type == Constants.ActionExecute) {
-			actionObject["verb"] = verb
-		}
-		this.onExecuteAction(actionObject, ignoreInputValidation);
+		return mergedObject;
 	}
 
 	/**
@@ -152,12 +145,6 @@ export class ActionButton extends React.Component {
 	 */
 	onToggleActionCalled() {
 		this.toggleVisibilityForElementWithID(this.payload.targetElements);
-	}
-
-
-	onOpenURLCalled = () => {
-		let actionObject = { "type": this.payload.type, "url": this.payload.url };
-		this.onExecuteAction(actionObject);
 	}
 
 	changeShowCardState = () => {
@@ -186,6 +173,17 @@ export class ActionButton extends React.Component {
 	getButtonStyles = () => {
 		let computedStyles = [this.styleConfig.button,
 		this.styleConfig.actionIconFlex, styles.button];
+		if (this.hostConfig.actions.actionsOrientation === Enums.Orientation.Horizontal) {
+			if (this.props.isFirst && this.props.isLast) {
+				//Only one lement...Margin not required
+			} else if (this.props.isFirst) {
+				computedStyles.push({ marginRight: 5 })
+			} else if (this.props.isLast) {
+				computedStyles.push({ marginLeft: 5 })
+			} else {
+				computedStyles.push({ marginRight: 5, marginLeft: 5 })
+			}
+		}
 
 		if (this.sentiment == Enums.Sentiment.Positive) {
 			computedStyles.push(this.styleConfig.defaultPositiveButtonBackgroundColor);
@@ -245,8 +243,7 @@ const styles = StyleSheet.create({
 		justifyContent: Constants.CenterString,
 		padding: 10,
 		marginBottom: 10,
-		flexGrow: 1,
-		marginHorizontal: 5
+		flexGrow: 1
 	},
 	buttonIcon: {
 		marginLeft: 5,

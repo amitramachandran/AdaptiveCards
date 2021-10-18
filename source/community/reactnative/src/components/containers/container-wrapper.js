@@ -63,8 +63,14 @@ export class ContainerWrapper extends React.PureComponent {
      */
     getComputedStyles = () => {
         let computedStyles = [];
-
         const { hostConfig } = this.props.configManager;
+
+        //Constructing the vertical Content Alignment for columnSet
+        if (this.payload.parent && this.payload.parent["verticalContentAlignment"]) {
+            if(this.payload.type === Constants.TypeColumnSet) {
+                this.payload.verticalContentAlignment = this.payload.parent["verticalContentAlignment"];
+            }
+        }
 
         // vertical content alignment
         let verticalContentAlignment = Utils.parseHostConfigEnum(
@@ -88,9 +94,9 @@ export class ContainerWrapper extends React.PureComponent {
         // container BG style
         let backgroundStyle;
         const styleDefinition = hostConfig.containerStyles.getStyleByName(this.payload["style"], hostConfig.containerStyles.getStyleByName("default"));
-        //we won't apply the background color for the container which has backgroundImage. Even we won't apply color if its parent container having backgroundImage
-        const hasBackgroundImage = !Utils.isNullOrEmpty(this.payload.backgroundImage) || (this.payload.parent && !Utils.isNullOrEmpty(this.payload.parent.backgroundImage)) || (!Utils.isNullOrEmpty(this.props.hasBackgroundImage))
-        if (!hasBackgroundImage && !Utils.isNullOrEmpty(styleDefinition.backgroundColor)) {
+        // If needed, we will use this hasBackgroundImage in the future. so commenting out the below line
+        // const hasBackgroundImage = !Utils.isNullOrEmpty(this.payload.backgroundImage) || (this.payload.parent && !Utils.isNullOrEmpty(this.payload.parent.backgroundImage)) || (!Utils.isNullOrEmpty(this.props.hasBackgroundImage))
+        if (!Utils.isNullOrEmpty(styleDefinition.backgroundColor)) {
             backgroundStyle = { backgroundColor: this.payload["style"] !== undefined ? Utils.hexToRGB(styleDefinition.backgroundColor) : "transparent" };
         }
         computedStyles.push(backgroundStyle);
@@ -100,17 +106,16 @@ export class ContainerWrapper extends React.PureComponent {
         const borderColor = styleDefinition.borderColor;
         computedStyles.push({ borderWidth: borderThickness, borderColor: Utils.hexToRGB(borderColor) });
 
+        
         // padding
-        const padding = hostConfig.getEffectiveSpacing(Enums.Spacing.Padding);
-        computedStyles.push({ padding: padding });
+        // const padding = hostConfig.getEffectiveSpacing(Enums.Spacing.Padding);
+        if (this.payload.style) {
+            computedStyles.push({ padding: Constants.containerPadding});
+        }
 
         // bleed
-        if (this.payload.bleed && this.props.containerStyle) {
-            const { isFirst, isLast } = this.props;
-            const marginLeft = isFirst ? -padding : 0;
-            const marginRight = isLast ? -padding : 0;
-
-            computedStyles.push({ marginVertical: -padding, marginLeft, marginRight });
+        if (this.payload.bleed && this.payload.style) {
+            computedStyles.push({ padding: -Constants.containerPadding});
         }
 
         // height 

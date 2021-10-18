@@ -5,8 +5,11 @@ import DataBindingPayloads from './payloads/data-binding';
 
 // sample scenarios
 const calendarReminderPayload = require('./payloads/scenarios/calendar-reminder.json');
+const fieldValidationPayload = require('./payloads/scenarios/field-validation.json');
 const flightUpdatePayload = require('./payloads/scenarios/flight-update.json');
 const inputFormPayload = require('./payloads/scenarios/input-form.json');
+const flightItineraryPayload = require('./payloads/scenarios/flight-itinerary.json');
+const calendarInvitePayload = require('./payloads/scenarios/calendar-invite.json');
 const restaurantPayload = require('./payloads/scenarios/restaurant.json');
 const containerPayload = require('./payloads/scenarios/container-item.json');
 const weatherPayload = require('./payloads/scenarios/weather-large.json');
@@ -41,6 +44,11 @@ const AdaptiveCardScenarios = [{
     tags: getTags(calendarReminderPayload),
     icon: require('./assets/calendar.png')
 }, {
+    title: 'Field validations',
+    json: fieldValidationPayload,
+    tags: getTags(fieldValidationPayload),
+    icon: require('./assets/form.png')
+}, {
     title: 'Flight update',
     json: flightUpdatePayload,
     tags: getTags(flightUpdatePayload),
@@ -61,6 +69,17 @@ const AdaptiveCardScenarios = [{
     json: foodOrderPayload,
     tags: getTags(foodOrderPayload),
     icon: require('./assets/fastfood.png')
+},
+{
+    title: 'Calendar Invite',
+    json: calendarInvitePayload,
+    tags: getTags(calendarInvitePayload),
+    icon: require('./assets/calendar.png')
+}, {
+    title: 'Flight Itinerary',
+    json: flightItineraryPayload,
+    tags: getTags(flightItineraryPayload),
+    icon: require('./assets/flight.png')
 },
 {
     title: 'Image gallery',
