@@ -148,7 +148,7 @@ CANVAS_COLOR = {
     "GOLD": [0, 255, 255],
 }
 BACKGROUND_COLOR = "WHITE"
-ELEMENT_COUNT_THRESHOLD = 5
+ELEMENT_COUNT_THRESHOLD = 4
 BULK_IMAGES_NEEDED = 10
 ELEMENTS_DIR = os.path.join(
     os.path.dirname(__file__), "../data/synthetic/card_elements/"
@@ -162,3 +162,11 @@ GENERATED_ANNOTATION_DIR = os.path.join(
 GENERATED_ZIP_DIR = os.path.join(
     os.path.dirname(__file__), "../data/synthetic/generated_zipfiles/"
 )
+
+ELEMENT_POSITION = {
+    "images": "top_right",
+    "actionset": "bottom_right",
+    "radiobutton": "top_left",
+    "textbox": "top_left",
+    "checkbox": "top_left",
+}

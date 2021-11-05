@@ -70,8 +70,8 @@ def get_synthetic_image_properties(
     return generated_image
     """
     layout = synthetic.CardElements(number_of_elements, card_elements_dir_path)
-    padded_image_element = synthetic.add_padding_to_img_elements(
-        layout.elements_with_path
+    padded_image_element = layout.add_padding_to_img_elements(
+        layout.elements_with_path, layout.elements_type
     )
     generated_image = synthetic.generate_image(padded_image_element)
     synthetic_image_properties = {

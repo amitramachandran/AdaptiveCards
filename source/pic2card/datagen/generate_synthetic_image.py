@@ -8,7 +8,7 @@ import random
 import os
 import glob
 import logging
-from typing import List, Sequence, Any
+from typing import List, Sequence, Any, Dict
 import cv2
 import numpy as np
 from mystique import config
@@ -36,8 +36,9 @@ class CardElements:
         self.element_dimensions = self.get_elements_dimensions(
             self.elements_with_path
         )
+        self.elements_type = self.get_elements_type(self.elements_with_path)
 
-    def get_elements_path(self) -> List[str]:
+    def get_elements_path(self) -> Dict[str, str]:
         """
         Returns a list of complete path of card_elements selected at random
         @param self: CardElements object
@@ -56,6 +57,17 @@ class CardElements:
         return elements_with_path
 
     @staticmethod
+    def get_elements_type(elements_with_path: List[str]) -> Dict[int, str]:
+        """
+        Returns the list of element types of card_elements
+        @params self: CardElements object
+        @return: element_types
+        """
+        element_type = [os.path.basename(os.path.dirname(element)) for element in elements_with_path]
+        element_type = {k: v for k, v in enumerate(element_type)}
+        return element_type
+
+    @staticmethod
     def get_elements_dimensions(elements_with_path: List[str]) -> List[tuple]:
         """
         Returns a list of dimensions for the selected elements
@@ -69,36 +81,67 @@ class CardElements:
             elements_dimensions.append(dimension)
         return elements_dimensions
 
-
-def add_padding_to_img_elements(
-    elements_with_path: List[str],
-) -> List[Sequence]:
-    """
-    Returns a list of elements in image format padded
-    along width of the image
-    @param elements_with_path: list of elements path from elements directory
-    @return: reshaped_image_elements
-    """
-
-    image_elements = [cv2.imread(element) for element in elements_with_path]
-    reference_canvas_width = max(
-        [element.shape[1] for element in image_elements]
-    )
-    reshaped_image_elements = []
-    for image_element in image_elements:
-        image_element_width = image_element.shape[1]
-        pixel_diff = reference_canvas_width - image_element_width
-        padded_image_element = cv2.copyMakeBorder(
-            image_element,
-            top=10,
-            bottom=10,
-            left=10,
-            right=pixel_diff + 10,
-            borderType=cv2.BORDER_CONSTANT,
-            value=config.CANVAS_COLOR["WHITE"],
+    def add_padding_to_img_elements(self, elements_with_path: List[str],
+                                    elements_type: Dict[int, str]) -> List[Sequence]:
+        """
+        Returns a list of elements in image format padded
+        along width of the image
+        @param elements_with_path: list of elements path from elements directory
+        @param elements_type: list of element categories
+        @return: reshaped_image_elements
+        """
+        sorted_elements_with_path = position_elements_path(elements_with_path, elements_type)
+        # get the updated elements type for the sorted elements path
+        elements_type = self.get_elements_type(sorted_elements_with_path)
+        # updating the sorted list for annotator
+        self.elements_with_path = sorted_elements_with_path
+        self.elements_type = elements_type
+        image_elements = [cv2.imread(element) for element in sorted_elements_with_path]
+        reference_canvas_width = max(
+            [element.shape[1] for element in image_elements]
         )
-        reshaped_image_elements.append(padded_image_element)
-    return reshaped_image_elements
+        reshaped_image_elements = []
+        for e_index, image_element in enumerate(image_elements):
+            image_element_width = image_element.shape[1]
+            pixel_diff = reference_canvas_width - image_element_width
+            # To place at proper position - left, right
+            e_type = elements_type[e_index]
+            e_position = config.ELEMENT_POSITION[e_type]
+            if 'right' in e_position:
+                padded_image_element = cv2.copyMakeBorder(
+                    image_element,
+                    top=10,
+                    bottom=10,
+                    left=pixel_diff + 10,
+                    right=10,
+                    borderType=cv2.BORDER_CONSTANT,
+                    value=config.CANVAS_COLOR["WHITE"],
+                )
+            elif 'left' in e_position:
+                padded_image_element = cv2.copyMakeBorder(
+                    image_element,
+                    top=10,
+                    bottom=10,
+                    left=10,
+                    right=pixel_diff + 10,
+                    borderType=cv2.BORDER_CONSTANT,
+                    value=config.CANVAS_COLOR["WHITE"],
+                )
+            else:
+                raise Exception('Position configuration for the elements are not provided')
+            reshaped_image_elements.append(padded_image_element)
+        return reshaped_image_elements
+
+
+def position_elements_path(elements_with_path, elements_type):
+    elements_position_key = config.ELEMENT_POSITION
+    for path_index, element_path in enumerate(elements_with_path):
+        e_path_type = elements_type[path_index]
+        elements_position = elements_position_key[e_path_type]
+        if 'bottom' in elements_position:
+            elements_with_path.pop(path_index)
+            elements_with_path.append(element_path)
+    return elements_with_path
 
 
 def generate_image(reshaped_image_elements: List[Sequence]) -> List[Sequence]:
@@ -117,7 +160,7 @@ def generate_image(reshaped_image_elements: List[Sequence]) -> List[Sequence]:
             reshaped_image_elements[: number_of_elements // 2]
         )
         right_elements = np.vstack(
-            reshaped_image_elements[number_of_elements // 2 :]
+            reshaped_image_elements[number_of_elements // 2:]
         )
         pixel_diff = abs(left_elements.shape[0] - right_elements.shape[0])
 
