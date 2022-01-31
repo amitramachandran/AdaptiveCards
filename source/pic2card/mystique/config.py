@@ -164,9 +164,13 @@ GENERATED_ZIP_DIR = os.path.join(
 )
 
 ELEMENT_POSITION = {
-    "images": "top_right",
-    "actionset": "bottom_right",
-    "radiobutton": "top_left",
-    "textbox": "top_left",
-    "checkbox": "top_left",
+    "images": ["top_right", "mid_left", "mid_right"],
+    "textbox": ["top_left", "top_right", ], # "mid_left", "mid_right"],
+    "radiobutton": ["mid_left", ],
+    "checkbox": ["mid_left", "mid_right"],
+    "actionset": ["bottom_right", "bottom_left"],
 }
+
+MANDATORY_CARD_ELEMENTS = [
+    "textbox",
+]
