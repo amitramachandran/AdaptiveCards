@@ -49,6 +49,9 @@ export class StyleConfig {
 			input: {
 				...this.themeConfig.input[Platform.OS]
 			},
+			inputLabel: {
+				...this.themeConfig.inputLabel[Platform.OS]
+			},
 			defaultPositiveButtonBackgroundColor: {
 				backgroundColor: this.hostConfig.containerStyles.default.foregroundColors.accent.default,
 			},
@@ -81,6 +84,24 @@ export class StyleConfig {
 			},
 			dropdownText: {
 				...this.themeConfig.dropdownText[Platform.OS]
+			},
+			picker: {
+				...this.themeConfig.picker[Platform.OS]
+			},
+			dateTimePicker: {
+				...this.themeConfig.dateTimePicker[Platform.OS]
+			},
+			inlineAction: {
+				...this.themeConfig.inlineAction[Platform.OS]
+			},
+			inlineActionText: {
+				...this.themeConfig.inlineActionText[Platform.OS]
+			},
+			actionSet: {
+				...this.themeConfig.actionSet[Platform.OS]
+			},
+			inputContainer: {
+				...this.themeConfig.inputContainer[Platform.OS]
 			}
 		};
 		return styles;

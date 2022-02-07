@@ -10,6 +10,7 @@ from .utils import get_image_name
 import cv2
 
 
+
 def calculate_annotation(
     elements_with_path: List[str],
     elements_dimensions: List[tuple],
@@ -25,6 +26,7 @@ def calculate_annotation(
     @param padded_image_element: list of image elements after padding
     @param has_merged_image_element: boolean True if the image has any merged elements
     @param element_positions: list of the image element postions on canvas wrt config
+
     @return: annotations
     """
     annotations = []
@@ -40,6 +42,9 @@ def calculate_annotation(
         else:
             xmin = 10
 
+    number_of_elements = len(elements_with_path)
+    for index in range(number_of_elements):
+        xmin = 10
         if index == 0:
             ymin = 10
         else:
@@ -51,6 +56,7 @@ def calculate_annotation(
             xmax = padded_elements_width - 10
         else:
             xmax = elements_dimensions[index][1] + 10
+        xmax = elements_dimensions[index][1] + 10
         ymax = (
             sum([padded_elements_height[height] for height in range(index + 1)])
             - 10
@@ -60,7 +66,6 @@ def calculate_annotation(
             if has_merged_image_element[index] and 'right' in element_positions[index]:
                 ymin = annotations[-1][0][1]
                 ymax = annotations[-1][1][1]
-
         annotations.append([(xmin, ymin), (xmax, ymax)])
     return annotations
 
@@ -122,6 +127,7 @@ def run_annotator(
     @param padded_image_element: list of image elements after padding
     @param has_merged_image_element: boolean True if the image has any merged elements
     @param element_positions: list of the image element postions on canvas wrt config
+
     @return: annotations
     """
     number_of_elements = len(elements_with_path)
@@ -190,13 +196,15 @@ def get_annotation_file(
         layout.has_merged_elements,
         layout.element_positions,
     )
-
+    
+    """
     #check annotations
     for annotation in annotations:
         cv2.rectangle(generated_image, annotation[0], annotation[1], (255, 0, 0), 2)
     cv2.imshow('annotated_image', generated_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    """
 
     # get annotation xml
     annotation_xml = generate_annotation_xml(

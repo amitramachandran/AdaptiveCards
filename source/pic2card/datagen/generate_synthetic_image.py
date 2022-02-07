@@ -72,7 +72,6 @@ class CardElements:
                 elements, k=self.number_of_elements
             )
             elements_with_path = self.get_mandatory_element(elements_with_path)
-
         else:
             error_msg = "No image elements found under card_elements directory"
             logger.error(error_msg)
@@ -268,7 +267,6 @@ def check_possible_element_merge(element_positions, elements_path):
             e_merge.insert(index, False)
 
     return e_merge
-
 
 def generate_image(reshaped_image_elements: List[Sequence]) -> List[Sequence]:
     """

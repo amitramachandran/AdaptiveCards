@@ -114,7 +114,7 @@ export class BackgroundImage extends React.Component {
                     <Image
                         key="image-repeat"
                         resizeMethod={Constants.Resize}
-                        accessible={true}
+                        accessible={this.backgroundImage.altText ? true : false}
                         accessibilityLabel={this.backgroundImage.altText}
                         source={{ uri: this.backgroundImage.url }}
                         onError={() => { this.onError(onParseError) }}
@@ -128,7 +128,7 @@ export class BackgroundImage extends React.Component {
                     <Image
                         key="image-repeat-horizontal"
                         resizeMethod={Constants.Resize}
-                        accessible={true}
+                        accessible={this.backgroundImage.altText ? true : false}
                         accessibilityLabel={this.backgroundImage.altText}
                         source={{ uri: this.backgroundImage.url }}
                         onError={() => { this.onError(onParseError) }}
@@ -146,7 +146,7 @@ export class BackgroundImage extends React.Component {
                     <Image
                         key="image-repeat-vertical"
                         resizeMethod={Constants.Resize}
-                        accessible={true}
+                        accessible={this.backgroundImage.altText ? true : false}
                         accessibilityLabel={this.backgroundImage.altText}
                         source={{ uri: this.backgroundImage.url }}
                         onError={() => { this.onError(onParseError) }}
@@ -161,10 +161,10 @@ export class BackgroundImage extends React.Component {
                     <Image
                         key="image-stretch"
                         source={{ uri: this.backgroundImage.url }}
-                        accessible={true}
+                        accessible={this.backgroundImage.altText ? true : false}
                         accessibilityLabel={this.backgroundImage.altText}
                         onError={() => { this.onError(onParseError) }}
-                        style={{ width: Constants.FullWidth, height: Constants.FullWidth, resizeMode: Constants.AlignStretch }}
+                        style={{ width: Constants.FullWidth, height: Constants.FullWidth, resizeMode: Constants.Cover }}
                     />
                 );
                 break;
@@ -177,7 +177,10 @@ export class BackgroundImage extends React.Component {
     }
 
     render() {
-        return (
+		this.backgroundImage = this.props.backgroundImage;
+    this.backgroundImage.url = Utils.getImageUrl(this.backgroundImage.url)
+
+		return (
             <InputContextConsumer>
                 {({ onParseError }) => (this.getBackgroundImage(onParseError))}
             </InputContextConsumer>

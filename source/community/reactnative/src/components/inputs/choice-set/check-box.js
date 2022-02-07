@@ -19,6 +19,7 @@ const IMAGE_COLOR_PROPERTY = "tintColor";
 const TEXT_COLOR_PROPERTY = "color";
 const styles = StyleSheet.create({
 	contentStyle: {
+		marginVertical: 3,
 		alignItems: Constants.CenterString
 	},
 	labelStyle: {
@@ -123,7 +124,10 @@ class CheckBox extends React.PureComponent {
 		return (
 			<TouchableOpacity activeOpacity={1}
 				onPress={this.onChange.bind(this)}
-				style={style}>
+				style={style}
+				accessibilityRole={this.props.isRadioButtonType ? 'radio' : 'checkbox'}
+				accessibilityState={{checked: this.state.checked}}
+				>
 				{this.renderContent()}
 			</TouchableOpacity>
 		)

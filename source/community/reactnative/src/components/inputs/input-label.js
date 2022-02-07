@@ -19,19 +19,29 @@ export default class InputLabel extends React.Component {
 		this.style = props.style || {};
 		this.isRequired = props.isRequired || false;
 		this.hostConfig = props.configManager.hostConfig;
+		this.altText = props.altText;
+		this.applyStyleConfig = props.applyStyleConfig;
 	}
 
 	render() {
-		const { label, wrap, style } = this;
+		const { label, wrap, style, applyStyleConfig } = this;
+
+		// NOTE :: Do not apply label styles on Toggle, other Input's labels style is picked from themeconfig
+		let computedStyle = style;
+		if (typeof applyStyleConfig !== 'boolean' || applyStyleConfig) {
+			computedStyle = this.props.configManager.styleConfig.inputLabel;
+		}
+
 		let inputLabel = null;
 		if (label != Constants.EmptyString) {
 			if (typeof label == Constants.TypeString) {
 				inputLabel = (
 					<Label
 						text={label}
-						style={[this.props.configManager.styleConfig.defaultFontConfig, style]}
+						style={[this.props.configManager.styleConfig.defaultFontConfig, computedStyle]}
 						configManager={this.props.configManager}
-						wrap={wrap} />
+						wrap={wrap}
+						altText={this.props.altText} />
 				);
 			} else if (typeof label == Constants.TypeObject && this.isValidLabelType(label.type)) {
 				let element = [];
@@ -43,7 +53,7 @@ export default class InputLabel extends React.Component {
 		}
 		if (inputLabel) {
 			return (
-				<View style={styles.container}>
+				<View style={styles.container} accessible={typeof label == Constants.TypeString ? true: undefined}>
 					<View>{inputLabel}</View>
 					{this.isRequired && this.getRedAsterisk()}
 				</View>
@@ -63,8 +73,7 @@ export default class InputLabel extends React.Component {
 
 const styles = StyleSheet.create({
 	container: {
-		flexDirection: Constants.FlexRow,
-		marginLeft: 5
+		flexDirection: Constants.FlexRow
 	},
 	redAsterisk: {
 		marginLeft: 2,

@@ -177,6 +177,7 @@ export const ElementType = Object.freeze({
 
 export const ThemeElement = Object.freeze({
 	Input: "input",
+	InputLabel: "inputLabel",
 	Button: "button",
 	InputDate: "inputDate",
 	InputTime: "inputTime",
@@ -186,4 +187,11 @@ export const ThemeElement = Object.freeze({
 	CheckBoxText: "checkBoxText",
 	Dropdown: "dropdown",
 	DropdownText: "dropdownText",
+	Picker: "picker",
+	DateTimePicker: "dateTimePicker",
+	Switch: "switch",
+	InlineAction: "inlineAction",
+	InlineActionText: "inlineActionText",
+	ActionSet: "actionSet",
+	InputContainer: "inputContainer"
 });

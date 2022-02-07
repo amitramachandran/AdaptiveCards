@@ -395,7 +395,13 @@ class FontConfig {
 export class HostConfig {
 	choiceSetInputValueSeparator = ",";
 	supportsInteractivity = true;
-	lineHeights;
+	lineHeights = {
+		small: 17,
+		default: 20,
+		medium: 23,
+		large: 26,
+		extraLarge: 34
+	};
 	spacing = {
 		none: 0,
 		small: 3,
@@ -407,7 +413,7 @@ export class HostConfig {
 	};
 	separator = {
 		lineThickness: 1,
-		lineColor: "#A9A9A9"
+		lineColor: "#EEEEEE"
 	};
 
 	horizontalAlignment = {
@@ -547,7 +553,7 @@ export class HostConfig {
 			case Enums.Spacing.Padding:
 				return this.spacing.padding;
 			default:
-				return this.spacing.small;
+				return this.spacing.default;
 		}
 	}
 
@@ -584,6 +590,26 @@ export class HostConfig {
 				return fontStyle.fontSizes.extraLarge;
 			default:
 				return fontStyle.fontSizes.default;
+		}
+	}
+
+	/**
+	 * @param {string} fontSize 
+	 */
+	 getTextLineHeight = (fontSize) => {
+		switch (fontSize) {
+			case Enums.TextSize.Small:
+				return this.lineHeights.small
+			case Enums.TextSize.Default:
+				return this.lineHeights.default;
+			case Enums.TextSize.Medium:
+				return this.lineHeights.medium;
+			case Enums.TextSize.Large:
+				return this.lineHeights.large;
+			case Enums.TextSize.ExtraLarge:
+				return this.lineHeights.extraLarge;
+			default:
+				return this.lineHeights.default;
 		}
 	}
 
@@ -808,7 +834,7 @@ export const defaultHostConfig = {
 	},
 	separator: {
 		lineThickness: 1,
-		lineColor: "#D9D9D9"
+		lineColor: "#EEEEEE"
 	},
 	imageSizes: {
 		small: 40,

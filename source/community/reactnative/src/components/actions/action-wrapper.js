@@ -28,6 +28,15 @@ export class ActionWrapper extends React.Component {
 		}
 	}
 
+	componentDidUpdate(prevProps) {
+		if (prevProps.actions !== this.props.actions) {
+			this.hasShowCard = false;
+			this.setState({
+				isShowCard: false,
+			});
+		}
+	}
+
 	hasShowCard = false;
 
 	onShowAdaptiveCard = (adaptiveCard) => {
@@ -67,13 +76,15 @@ export class ActionWrapper extends React.Component {
 					}
 				}
 				if (isValid) {
-					const isFirstElement = index == 0 || this.hostConfig.actions.actionsOrientation === Enums.Orientation.Vertical
+					const isFirstElement = index == 0
+					const isLastElement = index == (actions.length - 1)
 					if (element.type === 'Action.ShowCard') {
 						this.hasShowCard = true;
 						renderedElement.push(
 							<Element
 								json={element}
 								isFirst={isFirstElement}
+								isLast={isLastElement}
 								maxWidth={100 / actions.length + "%"}
 								configManager={this.props.configManager}
 								onShowCardTapped={this.onShowAdaptiveCard}
@@ -81,7 +92,7 @@ export class ActionWrapper extends React.Component {
 							/>);
 					}
 					else {
-						renderedElement.push(<Element json={element} configManager={this.props.configManager} isFirst={isFirstElement} maxWidth={100 / actions.length + "%"} key={`${element.type}-${index}`} />);
+						renderedElement.push(<Element json={element} configManager={this.props.configManager} isFirst={isFirstElement} isLast={isLastElement} maxWidth={100 / actions.length + "%"} key={`${element.type}-${index}`} />);
 					}
 				}
 			} else {
@@ -111,20 +122,34 @@ export class ActionWrapper extends React.Component {
 	}
 
 	render() {
-		return (<InputContextConsumer>
-			{({ onExecuteAction, onParseError }) =>
-				<View>
-					<View style={[styles.actionButtonContainer, this.getActionOrientation(), this.getActionAlignment()]}>
-						{this.parseActionsArray(onParseError)}
-					</View>
-					{this.hasShowCard ? ((this.state.isShowCard) ?
-						<AdaptiveCard
-							payload={this.state.cardJson}
-							configManager={this.props.configManager}
-							onExecuteAction={onExecuteAction} isActionShowCard={true} /> : null) : null}
-				</View>
-			}
-		</InputContextConsumer>);
+		return (
+            <InputContextConsumer>
+                {({onExecuteAction, onParseError}) => (
+                    <View>
+                        <View
+                            style={[
+                                styles.actionButtonContainer,
+                                this.getActionOrientation(),
+                                this.getActionAlignment(),
+                                this.props.style,
+                            ]}>
+                            {this.parseActionsArray(onParseError)}
+                        </View>
+                        {this.hasShowCard ? (
+                            this.state.isShowCard ? (
+                                <AdaptiveCard
+                                    payload={this.state.cardJson}
+                                    configManager={this.props.configManager}
+                                    onExecuteAction={onExecuteAction}
+                                    isActionShowCard={true}
+									containerStyle={{paddingVertical: 0}}
+                                />
+                            ) : null
+                        ) : null}
+                    </View>
+                )}
+            </InputContextConsumer>
+        );
 	}
 }
 
@@ -138,6 +163,7 @@ const styles = StyleSheet.create({
 	},
 	actionAlignmentVertical: {
 		flexDirection: Constants.FlexColumn,
+        flexWrap: Constants.NoWrap
 	},
 	leftAlignment: {
 		justifyContent: Constants.FlexStart,

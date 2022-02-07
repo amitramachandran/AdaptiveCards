@@ -11,7 +11,8 @@ import {
 	TextInput,
 	Modal,
 	Button,
-	ViewPropTypes
+	ViewPropTypes,
+	Platform
 } from 'react-native';
 
 import { InputContextConsumer } from '../../utils/context';
@@ -30,15 +31,17 @@ export class PickerInput extends React.Component {
 		this.payload = props.json;
 		this.id = Constants.EmptyString;
 		this.placeHolder = Constants.EmptyString;
+		this.placeholderTextColor = props.placeholderTextColor;
 		this.type = Constants.EmptyString;
 		this.modalButtonText = Constants.DoneString;
 		this.label = Constants.EmptyString;
 		this.parseHostConfig();
 
-		this.isRequired = this.payload.isRequired || false;
+		this.errorMessage = this.payload.errorMessage || Constants.ErrorMessage;
 
 		this.state = {
-			isError: this.isRequired && !this.props.value
+			isRequired: this.payload.isRequired || false,
+			isError: (this.payload.isRequired || false) && !this.props.value
 		}
 	}
 
@@ -53,7 +56,11 @@ export class PickerInput extends React.Component {
 	}
 
 	static getDerivedStateFromProps(nextProps, prevState) {
-		return { isError: this.isRequired && !nextProps.value }
+		if(!!nextProps.value) {
+			return { isError: prevState.isRequired && !nextProps.value };
+		}
+
+		return prevState;
 	}
 
 	render() {
@@ -82,19 +89,22 @@ export class PickerInput extends React.Component {
 			<InputContextConsumer>
 				{({ addInputItem, showErrors }) => (
 					<ElementWrapper configManager={this.props.configManager} style={styles.elementWrapper} json={this.payload} isError={this.state.isError} isFirst={this.props.isFirst}>
-						<InputLabel configManager={this.props.configManager} isRequired={this.isRequired} label={label} />
-						<TouchableOpacity style={styles.inputWrapper} onPress={this.props.showPicker}>
+						<InputLabel configManager={this.props.configManager} isRequired={this.state.isRequired} label={label} />
+						<TouchableOpacity style={styles.inputWrapper} onPress={this.props.showPicker}
+							accessibilityLabel={Platform.OS === 'android' ? (this.payload.altText || this.props.value || placeholder) : undefined}
+							accessibilityRole='button'>
 							{/* added extra view to fix touch event in ios . */}
 							<View
 								accessible={true}
+								importantForAccessibility={'no-hide-descendants'}
 								accessibilityLabel={this.payload.altText || this.props.value || placeholder}
-								pointerEvents='none'
-								style={this.getComputedStyles(showErrors)}>
+								pointerEvents='none'>
 								<TextInput
-									style={[this.props.style, this.styleConfig.defaultFontConfig]}
+									style={this.getComputedStyles(showErrors)}
 									autoCapitalize={Constants.NoneString}
 									autoCorrect={false}
 									placeholder={placeholder}
+									placeholderTextColor={this.placeholderTextColor}
 									textContentType={Constants.NoneString}
 									underlineColorAndroid={Constants.TransparentString}
 									value={this.props.value}>
@@ -108,7 +118,7 @@ export class PickerInput extends React.Component {
 							visible={this.props.modalVisible}
 							onRequestClose={this.props.handleModalClose}>
 							<View style={[styles.overlay, modalOverlayStyle]}>
-								<View style={[styles.modal, modalStyle]}>
+								<View style={[this.styleConfig.dateTimePicker, modalStyle]}>
 									<View style={[styles.modalBtnContainer, modalBtnContainer]}>
 										<Button
 											style={[modalButtonStyle]}
@@ -123,6 +133,7 @@ export class PickerInput extends React.Component {
 										value={this.props.chosenDate || new Date()}
 										minimumDate={this.props.minDate}
 										maximumDate={this.props.maxDate}
+										textColor={this.styleConfig.dateTimePicker.textColor}
 										onChange={(event, date) => this.props.handleDateChange(date)} />
 								</View>
 							</View>
@@ -138,8 +149,10 @@ export class PickerInput extends React.Component {
 	 * @param showErrors show errors based on this flag.
 	 */
 	getComputedStyles = (showErrors) => {
-		let computedStyles = [];
-		if (this.state.isError && showErrors && this.isRequired) {
+		// remove placeholderTextColor from styles object before using
+		const { placeholderTextColor, ...stylesObject } = this.props.style;
+		let computedStyles = [stylesObject, this.styleConfig.defaultFontConfig];
+		if (this.state.isError && showErrors && this.state.isRequired) {
 			computedStyles.push(this.styleConfig.borderAttention);
 			computedStyles.push({ borderWidth: 1 });
 		}
@@ -150,28 +163,21 @@ export class PickerInput extends React.Component {
 const styles = StyleSheet.create({
 	inputWrapper: {
 		width: Constants.FullWidth,
-		marginTop: 3,
+		marginTop: 3
 	},
 	elementWrapper: {
 		marginVertical: 3
 	},
 	overlay: {
 		flex: 1,
-		backgroundColor: 'rgba(0,0,0,.3)',
+		backgroundColor: Constants.BackgroundDisabledColor,
 		alignItems: Constants.CenterString,
 		justifyContent: Constants.FlexEnd
-	},
-	modal: {
-		backgroundColor: Constants.WhiteColor,
-		height: 260,
-		width: Constants.FullWidth
 	},
 	modalBtnContainer: {
 		width: Constants.FullWidth,
 		alignItems: Constants.CenterString,
 		flexDirection: Constants.FlexRow,
-		justifyContent: Constants.FlexEnd,
-		paddingHorizontal: 15,
-		marginTop: 15
+		justifyContent: Constants.FlexEnd
 	}
 });
