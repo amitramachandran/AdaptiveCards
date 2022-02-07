@@ -141,7 +141,8 @@ class CardElements:
             e_position = element_random_positions[e_index]
 
             merge = element_merge[e_index]
-            first_element_for_merging = element_merge[e_index] and element_merge[e_index + 1 if len(image_elements)-1 != e_index else 0]
+            first_element_for_merging = element_merge[e_index] and\
+                                        element_merge[e_index + 1 if len(image_elements)-1 != e_index else 0]
             if first_element_for_merging:
                 first_image_height_with_merge = image_elements[e_index].shape[0]
                 second_image_height = image_elements[e_index + 1 if len(image_elements) - 1 != e_index else 0].shape[0]
@@ -237,8 +238,8 @@ def position_elements_path(elements_with_path, elements_type):
             sorted_elements_path.get('mid').append(element_path)
         else:
             pass
-    sorted_elements_path = sorted_elements_path.get('top') + sorted_elements_path.get('mid') +\
-                           sorted_elements_path.get('bottom')
+    sorted_elements_path = sorted_elements_path.get('top') + sorted_elements_path.get('mid')\
+                           + sorted_elements_path.get('bottom')
     return sorted_elements_path
 
 
